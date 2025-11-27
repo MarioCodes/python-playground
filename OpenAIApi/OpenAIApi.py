@@ -14,18 +14,21 @@ openai_result = '''
 '''
 
 # regex patterns
-heading_pattern = r'\* (.+)'
-subheading_pattern = r'\s+[a-z]\. (.+)'
+section_regex = re.compile(r"\* (.+)")
+subsection_regex = re.compile(r"\s*([a-z]\..+)")
 
-# extract headings and subheadings
-headings = re.findall(heading_pattern, openai_result)
-subheadings = re.findall(subheading_pattern, openai_result)
+result_dict = {}
+current_section = None
 
 # print results
-print("Headings:\n")
-for heading in headings:
-    print(f"* {heading}")
+for line in openai_result.split("\n"):
+    section_match = section_regex.match(line)
+    subsection_match = subsection_regex.match(line)
 
-print("\nSubheadings:\n")
-for subheading in subheadings:
-    print(f"* {subheading}")
+    if section_match:
+        current_section = section_match.group(1)
+        result_dict[current_section] = []
+    elif subsection_match and current_section is not None:
+        result_dict[current_section].append(subsection_match.group(1))
+
+print(result_dict)

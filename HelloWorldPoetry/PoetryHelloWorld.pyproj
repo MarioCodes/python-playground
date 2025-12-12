@@ -2,16 +2,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>966f003a-8ad6-4d4e-b6c7-b2a14c784bbe</ProjectGuid>
+    <ProjectGuid>caceb948-93c3-4bed-8afa-35d77bab1b65</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>PromptEngineering.py</StartupFile>
+    <StartupFile>PoetryHelloWorld.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
-    <Name>PromptEngineering</Name>
-    <RootNamespace>PromptEngineering</RootNamespace>
-    <SuppressEnvironmentCreationPrompt>True</SuppressEnvironmentCreationPrompt>
+    <Name>PoetryHelloWorld</Name>
+    <RootNamespace>PoetryHelloWorld</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,7 +21,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="PromptEngineering.py" />
+    <Compile Include="PoetryHelloWorld.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

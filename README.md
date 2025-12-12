@@ -2,6 +2,9 @@
 install pip tools
 ~~~ bash
 py -m pip install pip-tools
+
+// upgrade pip
+pip install --upgrade pip
 ~~~
 
 Navigate to your project's folder

@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "promptengineering"
+version = "0.1.0"
+description = "Ejemplo minimo"
+authors = ["Mario Codes <mariocodes1993@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+[tool.poetry.scripts]
+hello = "PromptEngineering:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -72,5 +72,27 @@ see active env
 poetry env info
 ~~~
 
+build project
+~~~ bash
+poetry build
+~~~
+
+install and run a project through poetry
+~~~ bash
+// this works through pyproject.toml's conf
+poetry install
+~~~
+
+there you need something like this, where this 'hello' is the one you use to run the project
+~~~ toml
+[tool.poetry.scripts]
+hello = "PromptEngineering:main"
+~~~
+
+execute
+~~~ bash
+poetry run hello
+~~~
+
 ## Prompt engineering
 Ensure you have `OPENAI_API_KEY` as environment variable and billing enabled for that key. You'll need an account.

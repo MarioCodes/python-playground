@@ -48,7 +48,7 @@ poetry init
 poetry config virtualenvs.use-poetry-python true
 ~~~
 
-add dependencies later on
+add dependencies
 ~~~ bash
 poetry add {package_name}
 ~~~

@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "python program which accepts a pdf as input, converts into base64 and pastes it into your clipboard"
 authors = []
 readme = "README.md"
+license = "MIT"
+packages = [{ include = "FileConverter.py" }]
 
 [tool.poetry.dependencies]
 python = "^3.9"

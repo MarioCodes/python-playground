@@ -1,4 +1,3 @@
-
 import argparse
 import base64
 import sys
@@ -44,7 +43,12 @@ def convert_to_base64(file_path):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Lists documents in a folder and copies the selected file as base64 to the clipboard")
-    parser.add_argument("folder", help="Path to the folder containing documents")
+    parser.add_argument(
+        "folder",
+        nargs="?",
+        default=os.getcwd(),
+        help="Path to the folder containing documents (default: current working directory)"
+    )
     args = parser.parse_args(argv)
 
     folder_path = args.folder
@@ -57,6 +61,8 @@ def main(argv=None):
                 selected_file = documents[select - 1]
                 file_path = os.path.join(folder_path, selected_file)
                 convert_to_base64(file_path)
+            else:
+                print("Number out of range")
         except ValueError:
             print("Entry isn't valid. You have to enter a number")
 

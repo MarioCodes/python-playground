@@ -1,8 +1,10 @@
 
+import argparse
 import base64
 import sys
 import pyperclip
 import os
+import argparse
 
 VALID_EXTENSIONS = [".pdf", ".docx", ".txt", ".xlsx", ".pptx"]
 
@@ -40,12 +42,12 @@ def convert_to_base64(file_path):
     print("base64 content has been copied to your paperclip")
 
 
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python script.py <file_path>")
-        sys.exit(1)
-    
-    folder_path = sys.argv[1]
+def main(argv=None):
+    parser = argparse.ArgumentParser(description="Lists documents in a folder and copies the selected file as base64 to the clipboard")
+    parser.add_argument("folder", help="Path to the folder containing documents")
+    args = parser.parse_args(argv)
+
+    folder_path = args.folder
     documents = list_documents(folder_path)
 
     if documents:
@@ -57,3 +59,7 @@ if __name__ == "__main__":
                 convert_to_base64(file_path)
         except ValueError:
             print("Entry isn't valid. You have to enter a number")
+
+
+if __name__ == "__main__":
+    main()

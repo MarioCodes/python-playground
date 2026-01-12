@@ -12,7 +12,7 @@
     <Name>PromptEngineering</Name>
     <RootNamespace>PromptEngineering</RootNamespace>
     <SuppressEnvironmentCreationPrompt>True</SuppressEnvironmentCreationPrompt>
-    <InterpreterId>MSBuild|Scripts|$(MSBuildProjectFullPath)</InterpreterId>
+    <InterpreterId>Global|VisualStudio|pythoncore-3.14-64</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -23,21 +23,11 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="LangChain.py" />
     <Compile Include="PromptEngineering.py" />
   </ItemGroup>
   <ItemGroup>
-    <InterpreterReference Include="Global|PythonCore|3.9" />
-  </ItemGroup>
-  <ItemGroup>
-    <Interpreter Include="..\..\..\..\..\..\..\AppData\Local\pypoetry\Cache\virtualenvs\promptengineering-M5qcgr8i-py3.9\Scripts\">
-      <Id>Scripts</Id>
-      <Version>3.9</Version>
-      <Description>Poetry env for promptengineering</Description>
-      <InterpreterPath>python.exe</InterpreterPath>
-      <WindowsInterpreterPath>pythonw.exe</WindowsInterpreterPath>
-      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
-      <Architecture>X64</Architecture>
-    </Interpreter>
+    <InterpreterReference Include="Global|VisualStudio|pythoncore-3.14-64" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

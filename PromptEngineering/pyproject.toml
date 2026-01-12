@@ -1,16 +1,17 @@
 [tool.poetry]
 name = "promptengineering"
 version = "0.1.0"
-description = "Ejemplo minimo"
+description = "Ejemplo uso programatico AI"
 authors = ["Mario Codes <mariocodes1993@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.14"
 python-dotenv = "^1.2.1"
 dotenv = "^0.9.9"
 pandas = "^2.3.3"
 openai = "^2.11.0"
+langchain-openai = "^1.1.7"
 
 [tool.poetry.scripts]
 hello = "PromptEngineering:main"

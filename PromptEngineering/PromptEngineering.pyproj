@@ -24,6 +24,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="LangChain.py" />
+    <Compile Include="LangChainExpressionLanguage.py" />
     <Compile Include="PromptEngineering.py" />
   </ItemGroup>
   <ItemGroup>

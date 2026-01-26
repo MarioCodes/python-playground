@@ -1,6 +1,7 @@
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import AIMessage, SystemMessage, HumanMessage
 
+# A simple example of using LangChain to interact with OpenAI's chat models
 def main():
     chat = ChatOpenAI(temperature=0.9, model="gpt-4o-mini")
     messages = [

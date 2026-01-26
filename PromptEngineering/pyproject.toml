@@ -16,7 +16,8 @@ langchain = "^1.2.3"
 
 [tool.poetry.scripts]
 manual-prompt = "PromptEngineering:main"
-test = "LangChain:main"
+langchain-base = "LangChain:main"
+langchain-lcel = "LangChainExpressionLanguage:main"
 
 [build-system]
 requires = ["poetry-core"]

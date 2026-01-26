@@ -1,7 +1,6 @@
+# manual call with a prompt to OpenAI's API
+
 # to run make sure to execute the following
-# poetry add openai
-# poetry add pandas
-# poetry add dotenv
 # set OPENAI_API_KEY=x
 # configure your openAI project to be able to use model gpt-5-nano
 from dotenv import load_dotenv

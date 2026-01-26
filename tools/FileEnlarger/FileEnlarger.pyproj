@@ -2,17 +2,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>966f003a-8ad6-4d4e-b6c7-b2a14c784bbe</ProjectGuid>
+    <ProjectGuid>277245dc-1687-4e26-baa3-061c1c6714bf</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>PromptEngineering.py</StartupFile>
+    <StartupFile>FileEnlarger.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
-    <Name>PromptEngineering</Name>
-    <RootNamespace>PromptEngineering</RootNamespace>
-    <SuppressEnvironmentCreationPrompt>True</SuppressEnvironmentCreationPrompt>
-    <InterpreterId>Global|VisualStudio|pythoncore-3.14-64</InterpreterId>
+    <Name>FileEnlarger</Name>
+    <RootNamespace>FileEnlarger</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -23,12 +21,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="LangChain.py" />
-    <Compile Include="LangChainExpressionLanguage.py" />
-    <Compile Include="PromptEngineering.py" />
-  </ItemGroup>
-  <ItemGroup>
-    <InterpreterReference Include="Global|VisualStudio|pythoncore-3.14-64" />
+    <Compile Include="FileEnlarger.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

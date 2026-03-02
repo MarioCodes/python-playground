@@ -1,5 +1,6 @@
-# manual call with a prompt to OpenAI's API
-
+#
+# manual call with a prompt to OpenAI's API. It's executed 5 times to compare executions and see the variance in the responses
+#
 # to run make sure to execute the following
 # set OPENAI_API_KEY=x
 # configure your openAI project to be able to use model gpt-5-nano

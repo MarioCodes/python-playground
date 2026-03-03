@@ -1,8 +1,10 @@
-# manual call with a prompt to OpenAI's API
+"""Manual call with a prompt to OpenAI's API. It's executed 5 times to compare executions and see the variance in the responses
 
-# to run make sure to execute the following
-# set OPENAI_API_KEY=x
-# configure your openAI project to be able to use model gpt-5-nano
+Usage:
+    set OPENAI_API_KEY=x
+    configure your openAI project to be able to use model gpt-5-nano
+    poetry run call-to-openai
+"""
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -61,6 +63,3 @@ def main():
     # save dataframe to csv
     df.to_csv('prompt_responses.csv', index=False)
     print(df)
-
-if __name__ == "__main__":
-    main()

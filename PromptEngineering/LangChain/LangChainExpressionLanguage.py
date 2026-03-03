@@ -32,6 +32,3 @@ def main():
     })
 
     print(result.content)
-
-if __name__ == "__main__":
-    main()

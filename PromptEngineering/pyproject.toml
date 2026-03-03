@@ -1,9 +1,14 @@
 [tool.poetry]
 name = "PromptEngineering"
-version = "0.1.0"
+version = "0.2.0"
 description = "Ejemplo uso programatico AI"
 authors = ["Mario Codes <mariocodes1993@gmail.com>"]
 readme = "README.md"
+packages = [
+	{ include = "CallToOpenAI.py" },
+	{ include = "Embeddings" },
+	{ include = "LangChain" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.14"
@@ -13,11 +18,16 @@ pandas = "^2.3.3"
 openai = "^2.11.0"
 langchain-openai = "^1.1.7"
 langchain = "^1.2.3"
+azure-cosmos = "^4.15.0"
 
 [tool.poetry.scripts]
-manual-prompt = "PromptEngineering:main"
-langchain-base = "LangChain:main"
-langchain-lcel = "LangChainExpressionLanguage:main"
+call-to-openai = "CallToOpenAI:main"
+call-to-get-embeddings = "Embeddings.ManualCallToGetEmbeddingsFromText:main"
+call-to-insert-embeddings = "Embeddings.CallToInsertEmbeddingsIntoCosmos:main"
+call-to-query-embeddings = "Embeddings.CallToQueryEmbeddingsFromCosmos:main"
+
+langchain = "LangChain.LangChain:main"
+langchain-lcel = "LangChain.LangChainExpressionLanguage:main"
 
 [build-system]
 requires = ["poetry-core"]

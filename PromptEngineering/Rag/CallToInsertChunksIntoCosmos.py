@@ -1,6 +1,8 @@
-"""We have a text and we want to create its embedding and upload BOTH the og text and the embedding into Cosmos DB
-1st - creates embeddings for 'text'
-2nd - create an item which holds both text and embedding values and upload it into Cosmos DB
+"""We have a knowledge base which we want to get the vectors for it and upload BOTH the og text and the vectors into Cosmos DB
+1st - read files and chunk them
+2nd - clean up the text of the chunks
+3rd - create embeddings for the chunks in batches (to reduce API round-trips)
+4rth - insert into Cosmos DB both the original text and the embedding vector for each chunk, as a single item
 
 Azure resources needed:
     - Azure Foundry with a deployed 'text-embedding-3-large' model
@@ -14,9 +16,9 @@ Config:
     - set COSMOSDB_URL
     - set COSMOSDB_URL
     - set COSMOSDB_KEY
+
 I run this through poetry with 'poetry run x'
 """
-from sys import api_version
 from openai import AzureOpenAI
 from azure.cosmos import CosmosClient
 from langchain_community.document_loaders import PyPDFDirectoryLoader
@@ -56,22 +58,23 @@ def requireEnvVar(name):
         raise EnvironmentError(f"{name} is not set")
     return value
 
-# TODO: check and think how to check if documents have already been uploaded to CosmosDB. I need to avoid duplicates and stale information. 
+# TODO: check and think how to check if documents have already been uploaded to CosmosDB. I need to avoid duplicates and stale information 
 def main():
-    foundry_url = requireEnvVar('FOUNDRY_URL') # URL for your Azure Foundry with deployed models. e.g., "https://xxx.openai.azure.com/"
+    foundry_url = requireEnvVar('FOUNDRY_URL') 
     foundry_key = requireEnvVar('FOUNDRY_KEY')
-    cosmosdb_url = requireEnvVar('COSMOSDB_URL') # URL for your Cosmos DB instance. e.g., "https://xxx.documents.azure.com:443/"
+    cosmosdb_url = requireEnvVar('COSMOSDB_URL')
     cosmosdb_key = requireEnvVar('COSMOSDB_KEY')
 
     # load all PDFs we want to use for the RAG
-    # TODO: review this loader to check it works
+    
+    # TODO: manually review this loader to check it works
     loader = PyPDFDirectoryLoader("./Rag/knowledge_files/")
     docs = loader.load()
     if not docs:
         print("Error: No documents found in the specified directory. Please add some PDF files to './Rag/knowledge_files/' and try again.")
         return
 
-    # chunk the text of the PDFs into smaller pieces
+    # chunk the text of the PDFs into smaller pieces with an overlap
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     chunks = text_splitter.split_documents(docs)
 
@@ -81,21 +84,22 @@ def main():
         cleaned = chunk.page_content.replace("\n", " ").replace("\r", " ").replace("\t", " ")
         cleaned_texts.append(" ".join(cleaned.split()))
 
-    # create embeddings in batches (single client, fewer API round-trips)
+    # create embeddings in batches
     BATCH_SIZE = 100
     embeddings_client = createEmbeddingsClient(foundry_url, foundry_key)
     all_embeddings = []
     for i in range(0, len(cleaned_texts), BATCH_SIZE):
         batch = cleaned_texts[i:i + BATCH_SIZE]
-        print(f"Embedding batch {i // BATCH_SIZE + 1} ({len(batch)} chunks)...")
+        batch_number = i // BATCH_SIZE + 1
+        print(f"Embedding batch {batch_number} ({len(batch)} chunks)...")
         all_embeddings.extend(createEmbeddingsBatch(embeddings_client, batch))
 
-    # build items from results
+    # upload embeddings to Cosmos DB
     cosmos_container = getCosmosContainer(cosmosdb_url, cosmosdb_key, db_name="vectorial_ddbb_poc", container_name="container_for_vectors")
-    for idx, (cleaned_text, embedding) in enumerate(zip(cleaned_texts, all_embeddings), start=1):
+    for i in range(len(cleaned_texts)):
         item = {
-            "id": str(idx),
-            "original_text": cleaned_text,
-            "vectors": embedding
+            "id": str(i + 1),
+            "original_text": cleaned_texts[i],
+            "vectors": all_embeddings[i]
         }
         uploadToCosmosDB(cosmos_container, item=item)

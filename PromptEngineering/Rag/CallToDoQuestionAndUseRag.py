@@ -15,6 +15,7 @@ Config:
     - set FOUNDRY_KEY
     - set COSMOSDB_URL
     - set COSMOSDB_KEY
+
 I run this through poetry with 'poetry run x'
 """
 from openai import AzureOpenAI
@@ -74,9 +75,9 @@ def requireEnvVar(name):
     return value
 
 def main():
-    foundry_url = requireEnvVar('FOUNDRY_URL') # URL for your Azure Foundry with deployed models. e.g., "https://xxx.openai.azure.com/"
+    foundry_url = requireEnvVar('FOUNDRY_URL')
     foundry_key = requireEnvVar('FOUNDRY_KEY')
-    cosmosdb_url = requireEnvVar('COSMOSDB_URL') # URL for your Cosmos DB instance. e.g., "https://xxx.documents.azure.com:443/"
+    cosmosdb_url = requireEnvVar('COSMOSDB_URL')
     cosmosdb_key = requireEnvVar('COSMOSDB_KEY')
 
     # TODO: accept the question as user input

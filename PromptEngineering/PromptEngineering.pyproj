@@ -23,9 +23,14 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="LangChain.py" />
-    <Compile Include="LangChainExpressionLanguage.py" />
-    <Compile Include="PromptEngineering.py" />
+    <Compile Include="LangChain/LangChain.py" />
+    <Compile Include="LangChain/LangChainExpressionLanguage.py" />
+	<Compile Include="Embeddings/CallToInsertEmbeddingsIntoCosmos.py" />
+	<Compile Include="Embeddings/CallToQueryEmbeddingsFromCosmos.py" />
+	<Compile Include="Embeddings/ManualCallToGetEmbeddingsFromText.py" />
+	<Compile Include="Rag/CallToDoQuestionAndUseRag.py" />
+	<Compile Include="Rag/CallToInsertChunksIntoCosmos.py" />
+	<Compile Include="CallToOpenAI.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|VisualStudio|pythoncore-3.14-64" />

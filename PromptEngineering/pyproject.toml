@@ -8,6 +8,7 @@ packages = [
 	{ include = "CallToOpenAI.py" },
 	{ include = "Embeddings" },
 	{ include = "LangChain" },
+	{ include = "Rag" },
 ]
 
 [tool.poetry.dependencies]
@@ -19,12 +20,18 @@ openai = "^2.11.0"
 langchain-openai = "^1.1.7"
 langchain = "^1.2.3"
 azure-cosmos = "^4.15.0"
+pypdf = "^6.7.5"
+langchain-community = "^0.4.1"
+langchain-text-splitters = "^1.1.1"
 
 [tool.poetry.scripts]
 call-to-openai = "CallToOpenAI:main"
 call-to-get-embeddings = "Embeddings.ManualCallToGetEmbeddingsFromText:main"
 call-to-insert-embeddings = "Embeddings.CallToInsertEmbeddingsIntoCosmos:main"
 call-to-query-embeddings = "Embeddings.CallToQueryEmbeddingsFromCosmos:main"
+
+call-to-insert-chunks = "Rag.CallToInsertChunksIntoCosmos:main"
+call-to-rag-question = "Rag.CallToDoQuestionAndUseRag:main"
 
 langchain = "LangChain.LangChain:main"
 langchain-lcel = "LangChain.LangChainExpressionLanguage:main"

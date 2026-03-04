@@ -209,3 +209,5 @@ __marimo__/
 # custom
 .vs/
 PromptEngineering/prompt_responses.csv
+
+PromptEngineering/Rag/knowledge_files/

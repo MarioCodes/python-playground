@@ -211,3 +211,7 @@ __marimo__/
 PromptEngineering/prompt_responses.csv
 
 PromptEngineering/Rag/knowledge_files/
+
+AiLearning/Rag/knowledge_files/
+
+AiLearning/prompt_responses.csv

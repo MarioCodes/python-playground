@@ -3,11 +3,13 @@
 2nd - we search for proximity using the vectors and output the original text
 
 Config:
-    - embeddings model URL. This is the URL you get when you deploy the model in Azure Foundry
-    - cosmosDB URL. This is the URL you get when you create the Cosmos DB instance in Azure
-    - set EMBEDDINGS_API_KEY as system var
-    - set COSMOSDB_KEY as system var
-    - I run this through poetry with 'poetry run x'
+    - review the model used to embed the query "text-embedding-3-large" and check it is deployed in your Azure Foundry
+    - set FOUNDRY_URL as system var. This is the URL you get when you deploy models in your Foundry
+    - set FOUNDRY_KEY
+    - set COSMOSDB_URL
+    - set COSMOSDB_KEY
+
+I run this through poetry with 'poetry run x'
 """
 from sys import api_version
 from openai import AzureOpenAI
@@ -50,28 +52,27 @@ def queryFromCosmosDB(db_endpoint, db_key, db_name, container_name, sow_query_em
     results = list(container.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
     return results
 
+def requireEnvVar(name):
+    value = os.environ.get(name)
+    if not value:
+        raise EnvironmentError(f"{name} is not set")
+    return value
+
 def main():
     # setup
-    embeddings_model_url = "https://xxx.cognitiveservices.azure.com"
-    cosmosdb_url = "https://xxx.documents.azure.com:443/"
-    cosmosdb_key = os.environ.get('COSMOSDB_KEY')
-    if not cosmosdb_key:
-        print("Error: COSMOSDB_KEY environment variable is not set. Please set it before running the script.")
-        return
-
-    api_key = os.environ.get('EMBEDDINGS_API_KEY')
-    if not api_key:
-        print("Error: EMBEDDINGS_API_KEY environment variable is not set. Please set it before running the script.")
-        return
+    foundry_url = requireEnvVar('FOUNDRY_URL')
+    foundry_key = requireEnvVar('FOUNDRY_KEY')
+    cosmosdb_url = requireEnvVar('COSMOSDB_URL')
+    cosmosdb_key = requireEnvVar('COSMOSDB_KEY')
 
     # create embeddings for the text
-    text = "inu"
+    text = "Park"
 
-    vectors = createEmbeddingsForText(embeddings_model_url, api_key, text)
+    vectors = createEmbeddingsForText(foundry_url, foundry_key, text)
     print(f"Input text: '{text}'")
 
     # query from Cosmos DB using the embedding vector
-    results = queryFromCosmosDB(cosmosdb_url, cosmosdb_key, "vectorial_ddbb_poc", "container_for_vectors", vectors, top_k=3)
+    results = queryFromCosmosDB(cosmosdb_url, cosmosdb_key, "vectorial_ddbb_poc", "container_for_manual_querying", vectors, top_k=2)
     # Embeddings are a one-way transformation and cannot be reversed back into text
     # Instead, we store the original text alongside the embedding in Cosmos DB and retrieve it when querying for similar vectors
     print("Query results:")

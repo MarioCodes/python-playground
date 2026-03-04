@@ -7,11 +7,13 @@ Azure resources needed:
     - Cosmos DB instance with a database and a container 
 
 Config:
-    - embeddings model URL. This is the URL you get when you deploy the model in Azure Foundry
-    - cosmosDB URL. This is the URL you get when you create the Cosmos DB instance in Azure
-    - set EMBEDDINGS_API_KEY as system var
-    - set COSMOSDB_KEY as system var
-    - I run this through poetry with 'poetry run x'
+    - review the model used to embed the query "text-embedding-3-large" and check it is deployed in your Azure Foundry
+    - set FOUNDRY_URL as system var. This is the URL you get when you deploy models in your Foundry
+    - set FOUNDRY_KEY
+    - set COSMOSDB_URL
+    - set COSMOSDB_KEY
+
+I run this through poetry with 'poetry run x'
 """
 from sys import api_version
 from openai import AzureOpenAI
@@ -46,29 +48,28 @@ def uploadToCosmosDB(endpoint, key, db_name, container_name, item):
     except Exception as e:
         return f"Error uploading item: {e}"
 
-def main():
-    embeddings_model_url = "https://xxx.cognitiveservices.azure.com"
-    cosmosdb_url = "https://xxx.documents.azure.com:443/"
-    cosmosdb_key = os.environ.get('COSMOSDB_KEY')
-    if not cosmosdb_key:
-        print("Error: COSMOSDB_KEY environment variable is not set. Please set it before running the script.")
-        return
+def requireEnvVar(name):
+    value = os.environ.get(name)
+    if not value:
+        raise EnvironmentError(f"{name} is not set")
+    return value
 
-    api_key = os.environ.get('EMBEDDINGS_API_KEY')
-    if not api_key:
-        print("Error: EMBEDDINGS_API_KEY environment variable is not set. Please set it before running the script.")
-        return
+def main():
+    foundry_url = requireEnvVar('FOUNDRY_URL')
+    foundry_key = requireEnvVar('FOUNDRY_KEY')
+    cosmosdb_url = requireEnvVar('COSMOSDB_URL')
+    cosmosdb_key = requireEnvVar('COSMOSDB_KEY')
 
     # create embeddings for the text
-    text = "A car travels alone in the highway during the night"
-    vectors = createEmbeddingsForText(embeddings_model_url, api_key, text)
+    text = "A dog walks in the park"
+    vectors = createEmbeddingsForText(foundry_url, foundry_key, text)
     print(f"Input text: '{text}'")
     # print(f"Embedding dimensions: {len(vector)}") # see embedding dimensions
 
     # save original text and its vectors into a class and upload to Cosmos DB
     item = {
-        "id": "5", # manually do +1 to the last id in the Cosmos DB container (this is a POC after all)
+        "id": "3", # manually do +1 to the last id in the Cosmos DB container (this is a POC after all)
         "text": text,
         "embedding": vectors
     }
-    results = uploadToCosmosDB(cosmosdb_url, cosmosdb_key, db_name="vectorial_ddbb_poc",container_name="container_for_vectors", item=item)
+    results = uploadToCosmosDB(cosmosdb_url, cosmosdb_key, db_name="vectorial_ddbb_poc",container_name="container_for_manual_querying", item=item)

@@ -1,14 +1,14 @@
 [tool.poetry]
-name = "PromptEngineering"
-version = "0.2.0"
-description = "Ejemplo uso programatico AI"
+name = "AiLearning"
+version = "0.3.0"
+description = "Ejemplos de uso programaticos para aprender AI"
 authors = ["Mario Codes <mariocodes1993@gmail.com>"]
 readme = "README.md"
 packages = [
-	{ include = "CallToOpenAI.py" },
-	{ include = "Embeddings" },
+	{ include = "InsertAndQueryVectorDatabase" },
 	{ include = "LangChain" },
 	{ include = "Rag" },
+	{ include = "Testing" },
 ]
 
 [tool.poetry.dependencies]
@@ -25,13 +25,14 @@ langchain-community = "^0.4.1"
 langchain-text-splitters = "^1.1.1"
 
 [tool.poetry.scripts]
-call-to-openai = "CallToOpenAI:main"
-call-to-get-embeddings = "Embeddings.ManualCallToGetEmbeddingsFromText:main"
-call-to-insert-embeddings = "Embeddings.CallToInsertEmbeddingsIntoCosmos:main"
-call-to-query-embeddings = "Embeddings.CallToQueryEmbeddingsFromCosmos:main"
+call-to-openai = "Testing.CallToOpenAI:main"
+manually-get-embeddings = "Testing.ManualCallToGetEmbeddingsFromText:main"
 
-call-to-insert-chunks = "Rag.CallToInsertChunksIntoCosmos:main"
-call-to-rag-question = "Rag.CallToDoQuestionAndUseRag:main"
+insert-manual-embeddings = "InsertAndQueryVectorDatabase.InsertEmbeddings:main"
+query-manual-embeddings = "InsertAndQueryVectorDatabase.QueryVectorialDB:main"
+
+insert-rag-files = "Rag.ChunkFilesIntoCosmos:main"
+ask-rag-question = "Rag.AskWithRagContext:main"
 
 langchain = "LangChain.LangChain:main"
 langchain-lcel = "LangChain.LangChainExpressionLanguage:main"

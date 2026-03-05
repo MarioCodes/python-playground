@@ -1,6 +1,6 @@
 """Asks a question and uses RAG with documents previously stored in Cosmos DB to answer it.
 1st - embeds the user's question using the same embeddings model used during ingestion
-2nd - retrieves the most relevant chunks from Cosmos DB via cosine similarity
+2nd - retrieves the most relevant chunks from Cosmos DB via native vector search (VectorDistance, server-side)
 3rd - uses LangChain with the retrieved context to answer the question
 
 Azure resources needed:
@@ -23,7 +23,6 @@ from azure.cosmos import CosmosClient
 from langchain_openai import AzureChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from langchain_community.utils.math import cosine_similarity
 import os
 
 def embedQuery(endpoint, key, text):
@@ -45,28 +44,17 @@ def getCosmosContainer(endpoint, key, db_name, container_name):
     return database.get_container_client(container_name)
 
 def retrieveRelevantChunks(container, query_embedding, top_k=5):
-    items = list(container.read_all_items())
-
-    # collect the stored embedding vector from each document
-    embeddings = []
-    for item in items:
-        embeddings.append(item["vectors"])
-
-    # compare the query against all documents at once; one score per document
-    scores = cosine_similarity([query_embedding], embeddings)[0]
-
-    # pair each score with its document and sort highest-similarity first
-    scored_items = []
-    for i, item in enumerate(items):
-        scored_items.append((scores[i], item))
-    scored_items.sort(key=lambda x: x[0], reverse=True)
-
-    # extract only the original text from the top results
-    top_chunks = []
-    for _, item in scored_items[:top_k]:
-        top_chunks.append(item["original_text"])
-
-    return top_chunks
+    query = """
+        SELECT TOP @top_k c.original_text, VectorDistance(c.embeddings, @embedding) AS score
+        FROM c
+        ORDER BY VectorDistance(c.embeddings, @embedding)
+    """
+    parameters = [
+        {"name": "@top_k", "value": top_k},
+        {"name": "@embedding", "value": query_embedding},
+    ]
+    results = list(container.query_items(query=query, parameters=parameters, enable_cross_partition_query=True))
+    return [r["original_text"] for r in results]
 
 def requireEnvVar(name):
     value = os.environ.get(name)
@@ -91,7 +79,7 @@ def main():
     context = "\n\n".join(relevant_chunks)
 
     prompt = ChatPromptTemplate.from_messages([
-        ("system", "Answer based on the following context. If you don't know something say so. Ask the user for more information if a question isn't clear or is ambiguous. Context:\n\n{context}"),
+        ("system", "Answer based on the following context and ONLY on the provided context. If you don't have enough context to answer a question please say so. Ask the user for more information if a question isn't clear or is ambiguous. Context:\n\n{context}"),
         ("human", "{question}"),
     ])
 
@@ -105,4 +93,5 @@ def main():
 
     chain = prompt | llm | StrOutputParser()
     response = chain.invoke({"context": context, "question": question})
-    print(response)
+    clean_response = response.replace("**", "") # remove markdown items as I use this from a console
+    print(clean_response)

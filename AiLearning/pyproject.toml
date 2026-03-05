@@ -31,6 +31,7 @@ manually-get-embeddings = "Testing.ManualCallToGetEmbeddingsFromText:main"
 insert-manual-embeddings = "InsertAndQueryVectorDatabase.InsertEmbeddings:main"
 query-manual-embeddings = "InsertAndQueryVectorDatabase.QueryVectorialDB:main"
 
+setup-cosmosdb-for-rag = "Rag.SetupCosmosVectorContainer:main"
 insert-rag-files = "Rag.ChunkFilesIntoCosmos:main"
 ask-rag-question = "Rag.AskWithRagContext:main"
 

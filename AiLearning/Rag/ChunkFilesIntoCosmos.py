@@ -25,6 +25,7 @@ from langchain_community.document_loaders import PyPDFDirectoryLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 import os
+from datetime import datetime
 
 def createEmbeddingsClient(endpoint, key):
     return AzureOpenAI(
@@ -59,7 +60,6 @@ def requireEnvVar(name):
     return value
 
 # TODO: check and think how to check if documents have already been uploaded to CosmosDB. I need to avoid duplicates and stale information
-# TODO: to improve add to items date of the document so I can flavour and filter for recent documents later on (think of other metadata)
 def main():
     foundry_url = requireEnvVar('FOUNDRY_URL') 
     foundry_key = requireEnvVar('FOUNDRY_KEY')
@@ -68,12 +68,19 @@ def main():
 
     # load all PDFs we want to use for the RAG
     
-    # TODO: manually review this loader to check it works as I expect
+    # this retrieves all PDFs, each page as its own document
     loader = PyPDFDirectoryLoader("./Rag/knowledge_files/")
     docs = loader.load()
     if not docs:
         print("Error: No documents found in the specified directory. Please add some PDF files to './Rag/knowledge_files/' and try again.")
         return
+
+    print(f"\nTOTAL DOCUMENTS LOADED: {len(docs)}\n")
+    for doc in docs:
+        source = os.path.basename(doc.metadata.get("source", "unknown"))
+        print(f"Document: {source} (page {doc.metadata.get('page', '?')+1})")
+        print("Raw document's content:")
+        print(f"{repr(doc.page_content)}\n")
 
     # chunk the text of the PDFs into smaller pieces with an overlap
     chunk_splitter = RecursiveCharacterTextSplitter(
@@ -82,12 +89,23 @@ def main():
         separators=["\n\n", "\n", ". ", " ", ""]
     )
     chunks = chunk_splitter.split_documents(docs)
+    print(f"TOTAL CHUNKS CREATED: {len(chunks)}")
 
-    # clean all chunks up-front
+    # clean all chunks up-front and extract document metadata
     cleaned_texts = []
+    chunk_metadata = []
     for chunk in chunks:
         cleaned = chunk.page_content.replace("\n", " ").replace("\r", " ").replace("\t", " ")
         cleaned_texts.append(" ".join(cleaned.split()))
+
+        source_path = chunk.metadata.get("source", "")
+        document_name = os.path.basename(source_path) if source_path else "unknown"
+        document_date = datetime.fromtimestamp(os.path.getmtime(source_path)).isoformat() if source_path and os.path.exists(source_path) else "unknown"
+        chunk_metadata.append({"document_name": document_name, "document_date": document_date})
+    
+    print("\n\nCLEANED CHUNK TEXTS:")
+    for cleaned_text in cleaned_texts:
+        print(f"{repr(cleaned_text)}\n")
 
     # create embeddings in batches
     BATCH_SIZE = 100
@@ -105,6 +123,8 @@ def main():
         item = {
             "id": str(i + 1),
             "original_text": cleaned_texts[i],
-            "vectors": all_embeddings[i]
+            "embeddings": all_embeddings[i],
+            "document_name": chunk_metadata[i]["document_name"],
+            "document_date": chunk_metadata[i]["document_date"]
         }
         uploadToCosmosDB(cosmos_container, item=item)

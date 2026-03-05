@@ -30,8 +30,9 @@
     <Compile Include="InsertAndQueryVectorDatabase/InsertEmbeddings.py" />
     <Compile Include="Rag/AskWithRagContext.py" />
     <Compile Include="Rag/ChunkFilesIntoCosmos.py" />
+    <Compile Include="Rag\SetupCosmosVectorContainer.py" />
     <Compile Include="Testing/CallToOpenAI.py" />
-	<Compile Include="Testing/ManualCallToGetEmbeddingsFromText.py" />
+    <Compile Include="Testing/ManualCallToGetEmbeddingsFromText.py" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|VisualStudio|pythoncore-3.14-64" />
@@ -39,7 +40,8 @@
   <ItemGroup>
     <Folder Include="LangChain\" />
     <Folder Include="Rag\" />
-	<Folder Include="InsertAndQueryVectorDatabase\" />
+    <Folder Include="InsertAndQueryVectorDatabase\" />
+    <Folder Include="Testing\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

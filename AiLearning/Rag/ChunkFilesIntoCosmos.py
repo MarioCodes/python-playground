@@ -1,8 +1,8 @@
 """We have a knowledge base which we want to get the vectors for it and upload BOTH the og text and the vectors into Cosmos DB
-1st - read files and chunk them
+1st - read files and chunk them using semantic chunking
 2nd - clean up the text of the chunks
 3rd - create embeddings for the chunks in batches (to reduce API round-trips)
-4rth - insert into Cosmos DB both the original text and the embedding vector for each chunk, as a single item
+4rth - insert into Cosmos DB the original text, the embeddings and some metadata for each chunk as a single item
 
 Azure resources needed:
     - Azure Foundry with a deployed 'text-embedding-3-large' model
@@ -22,6 +22,9 @@ I run this through poetry with 'poetry run x'
 from openai import AzureOpenAI
 from azure.cosmos import CosmosClient
 from langchain_community.document_loaders import PyPDFDirectoryLoader
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_experimental.text_splitter import SemanticChunker
+from langchain_openai import AzureOpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 import os
@@ -59,16 +62,7 @@ def requireEnvVar(name):
         raise EnvironmentError(f"{name} is not set")
     return value
 
-# TODO: check and think how to check if documents have already been uploaded to CosmosDB. I need to avoid duplicates and stale information
-def main():
-    foundry_url = requireEnvVar('FOUNDRY_URL') 
-    foundry_key = requireEnvVar('FOUNDRY_KEY')
-    cosmosdb_url = requireEnvVar('COSMOSDB_URL')
-    cosmosdb_key = requireEnvVar('COSMOSDB_KEY')
-
-    # load all PDFs we want to use for the RAG
-    
-    # this retrieves all PDFs, each page as its own document
+def loadDocuments():
     loader = PyPDFDirectoryLoader("./Rag/knowledge_files/")
     docs = loader.load()
     if not docs:
@@ -81,24 +75,62 @@ def main():
         print(f"Document: {source} (page {doc.metadata.get('page', '?')+1})")
         print("Raw document's content:")
         print(f"{repr(doc.page_content)}\n")
+    return docs
 
-    # chunk the text of the PDFs into smaller pieces with an overlap
-    chunk_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500, 
-        chunk_overlap=100,
-        separators=["\n\n", "\n", ". ", " ", ""]
+# TODO: check and think how to check if documents have already been uploaded to CosmosDB. I need to avoid duplicates and stale information
+def main():
+    foundry_url = requireEnvVar('FOUNDRY_URL') 
+    foundry_key = requireEnvVar('FOUNDRY_KEY')
+    cosmosdb_url = requireEnvVar('COSMOSDB_URL')
+    cosmosdb_key = requireEnvVar('COSMOSDB_KEY')
+
+    # load all PDFs we want to use for the RAG
+    # this retrieves all PDFs, each page as its own document
+    docs = loadDocuments()
+    if not docs:
+        return
+
+    # naive char-fixed size chunking
+    # this chunks the text of the PDFs into smaller pieces with an overlap, but has the drawback of potentially cutting sentences in half or topics in multiple chunks.
+    # chunk_splitter = RecursiveCharacterTextSplitter(
+    #     chunk_size=500, 
+    #     chunk_overlap=100,
+    #     separators=["\n\n", "\n", ". ", " ", ""]
+    # )
+    # chunks = chunk_splitter.split_documents(docs)
+
+    # semantic chunking - this approach uses the Azure OpenAI embeddings to create chunks that are semantically meaningful
+    # It can help keep sentences and topics together, but it requires more API calls to create chunks
+    embeddings_model_chunking = AzureOpenAIEmbeddings(
+        azure_endpoint=foundry_url,
+        api_key=foundry_key,
+        api_version="2023-05-15",
+        azure_deployment="text-embedding-3-large",
     )
-    chunks = chunk_splitter.split_documents(docs)
-    print(f"TOTAL CHUNKS CREATED: {len(chunks)}")
+    semantic_chunker = SemanticChunker(embeddings_model_chunking, breakpoint_threshold_type="percentile")
+    semantic_chunks = semantic_chunker.create_documents(
+        [d.page_content for d in docs],
+        metadatas=[d.metadata for d in docs]
+    )
+    for semantic_chunk in semantic_chunks:
+        print("\n--- SEMANTIC CHUNK ---")
+        print(f"Chunk's length in characters: {len(semantic_chunk.page_content)}")
+        print(f"Chunk's' content: \n{repr(semantic_chunk.page_content)}")
+    print(f"TOTAL CHUNKS CREATED: {len(semantic_chunks)}")
+
 
     # clean all chunks up-front and extract document metadata
     cleaned_texts = []
     chunk_metadata = []
-    for chunk in chunks:
-        cleaned = chunk.page_content.replace("\n", " ").replace("\r", " ").replace("\t", " ")
-        cleaned_texts.append(" ".join(cleaned.split()))
+    for semantic_chunk in semantic_chunks:
+        cleaned = semantic_chunk.page_content.replace("\n", " ").replace("\r", " ").replace("\t", " ")
+        cleaned = " ".join(cleaned.split())
+        if not cleaned:
+            continue
 
-        source_path = chunk.metadata.get("source", "")
+        cleaned_texts.append(cleaned)
+
+        source_path = semantic_chunk.metadata.get("source", "")
         document_name = os.path.basename(source_path) if source_path else "unknown"
         document_date = datetime.fromtimestamp(os.path.getmtime(source_path)).isoformat() if source_path and os.path.exists(source_path) else "unknown"
         chunk_metadata.append({"document_name": document_name, "document_date": document_date})
@@ -106,8 +138,10 @@ def main():
     print("\n\nCLEANED CHUNK TEXTS:")
     for cleaned_text in cleaned_texts:
         print(f"{repr(cleaned_text)}\n")
+    print(f"TOTAL CHUNKS CLEANED: {len(cleaned_texts)}")
 
     # create embeddings in batches
+    # Azure OpenAI limits embedding requests to 16 inputs per call
     BATCH_SIZE = 100
     embeddings_client = createEmbeddingsClient(foundry_url, foundry_key)
     all_embeddings = []

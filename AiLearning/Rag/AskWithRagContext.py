@@ -18,13 +18,13 @@ Config:
 
 I run this through poetry with 'poetry run x'
 """
+import os
+import configparser
 from openai import AzureOpenAI
 from azure.cosmos import CosmosClient
 from langchain_openai import AzureChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-import os
-import configparser
 
 config = configparser.ConfigParser()
 config.read("settings.ini")
@@ -67,13 +67,15 @@ def requireEnvVar(name):
     return value
 
 def main():
+    question = input("Ask a question using RAG: ")
+    if not question.strip():
+        print("No question provided.")
+        return
+
     foundry_url = requireEnvVar('FOUNDRY_URL')
     foundry_key = requireEnvVar('FOUNDRY_KEY')
     cosmosdb_url = requireEnvVar('COSMOSDB_URL')
     cosmosdb_key = requireEnvVar('COSMOSDB_KEY')
-
-    # TODO: accept the question as user input
-    question = "What are profiles for?"
 
     query_embedding = embedQuery(foundry_url, foundry_key, question)
     cosmos_container = getCosmosContainer(cosmosdb_url, cosmosdb_key, db_name="vectorial_ddbb_poc", container_name="container_for_vectors")
